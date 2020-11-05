@@ -68,13 +68,13 @@ if (!file_exists($file)) {
     $log->info($file . ' found');
 }
 
-config(['DB_PORT' => $port]);
-config(['DB_USERNAME' => $user]);
-config(['DB_HOST' => $host]);
-config(['DB_PASSWORD' => $password]);
+config(['database.connections.mysql.port' => $port]);
+config(['database.connections.mysql.username' => $user]);
+config(['database.connections.mysql.host' => $host]);
+config(['database.connections.mysql.password' => $password]);
 
 //Force db refresh
-`php artisan:refresh`;
+`php artisan migrate:refresh`;
 //$artisan = new Artisan();
 //$artisan::call('migrate:refresh', [
 //    '--force' => TRUE,
@@ -87,7 +87,15 @@ if ($create_table) {
     $log->info('MYSQL users table created');
 }
 
-$users = Excel::toCollection(new UsersImport, $file);
+//try to make it a dry run if specified
+if ($dry_run) {
+    $log->info('Dry Run!');
+    $users = Excel::toCollection(new UsersImport, $file);
+} else {
+    $log->info('Production Run!');
+    $users = Excel::import(new UsersImport, $file);
+}
+
 
 dd(config('DB_PORT'),
     config('DB_HOST'),
