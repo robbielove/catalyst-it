@@ -7,6 +7,8 @@
 
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\UsersImport;
 
 //ensure we are installed
 `composer install`;
@@ -85,11 +87,15 @@ if ($create_table) {
     $log->info('MYSQL users table created');
 }
 
+$users = Excel::toCollection(new UsersImport, $file);
+
 dd(config('DB_PORT'),
     config('DB_HOST'),
     config('DB_USERNAME'),
-    config('DB_PASSWORD')
+    config('DB_PASSWORD'),
+$users
 );
+
 
 /*
 |--------------------------------------------------------------------------
