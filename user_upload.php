@@ -93,7 +93,7 @@ dd(config('DB_PORT'),
     config('DB_HOST'),
     config('DB_USERNAME'),
     config('DB_PASSWORD'),
-$users
+$users->first()->slice(1)
 );
 
 
