@@ -5,13 +5,13 @@
  * Time: 10:03 pm
  */
 
+use App\Imports\UsersImport;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\UsersImport;
 
 //ensure we are installed
-`composer install`;
+//`composer install`;
 
 //Load Laravel
 require __DIR__ . '/vendor/autoload.php';
@@ -41,9 +41,8 @@ $arguments = collect($argv)->slice(1);
 $cli = new Cli();
 $cli->description('Accepts a CSV file as input (see command line directives below) and processes the CSV file. The parsed file data is to be inserted into a MySQL database.')
     ->opt('file:f', 'This is the name of the CSV to be parsed.', TRUE)
-    ->opt('create_table', 'This will cause the MySQL users table to be built (and no further action will be taken)', FALSE)
-    ->opt('dry_run', 'This will be used with the --file directive in case we want to run the script but not insert into the DB. All other functions will be executed, but the database won\'t be altered
-', FALSE)
+    ->opt('create_table:c', 'This will cause the MySQL users table to be built (and no further action will be taken)', FALSE)
+    ->opt('dry_run:d', 'This will be used with the --file directive in case we want to run the script but not insert into the DB. All other functions will be executed, but the database will not be altered', FALSE, 'boolean')
     ->opt('port:P', 'Port number to use.', FALSE, 'integer')
     ->opt('user:u', 'User for login if not current user.', TRUE)
     ->opt('host:h', 'Connect to host.', TRUE)
@@ -54,8 +53,8 @@ $log = new TaskLogger();
 // Parse and return cli args.
 $args = $cli->parse($argv, TRUE);
 $file = $args->getOpt('file', 'users.csv');
-$create_table = $args->getOpt('create_table', FALSE);
-$dry_run = $args->getOpt('dry_run', FALSE);
+$create_table = $args->getOpt('create_table');
+$dry_run = $args->getOpt('dry_run');
 $port = $args->getOpt('port', env('DB_PORT', '3306'));
 $user = $args->getOpt('user', env('DB_USERNAME', 'root'));
 $host = $args->getOpt('host', env('DB_HOST', 'localhost'));
@@ -68,17 +67,18 @@ if (!file_exists($file)) {
     $log->info($file . ' found');
 }
 
+$users = Excel::toCollection(new UsersImport(), $file);
+$users = $users->first()->slice(1);
+$request = request()->merge($users->first()->slice(1)->all());
+//dd($users->first()->slice(1)->all(), $request->all());
+
 config(['database.connections.mysql.port' => $port]);
 config(['database.connections.mysql.username' => $user]);
 config(['database.connections.mysql.host' => $host]);
 config(['database.connections.mysql.password' => $password]);
 
 //Force db refresh
-`php artisan migrate:refresh`;
-//$artisan = new Artisan();
-//$artisan::call('migrate:refresh', [
-//    '--force' => TRUE,
-//]);
+`php artisan migrate:refresh --force`;
 
 //Abort if we are just here to make the DB - it was 'made' before...
 if ($create_table) {
@@ -89,20 +89,32 @@ if ($create_table) {
 
 //try to make it a dry run if specified
 if ($dry_run) {
-    $log->info('Dry Run!');
-    $users = Excel::toCollection(new UsersImport, $file);
+    $log->info('Dry Run! - ' . $users->count() . ' users found.');
 } else {
-    $log->info('Production Run!');
-    $users = Excel::import(new UsersImport, $file);
+    $log->info('Production Run! - ' . $users->count() . ' users found.');
+
+//    dd($import);
+    try {
+        if (File::exists($file)) {
+            $sheets = collect();
+            $import = (new UsersImport())->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
+            $import = $sheets->merge($import[0])->slice(1);
+        }
+//        $import = (new UsersImport())->toCollection('database/seeds/csv/app-features.csv', NULL, \Maatwebsite\Excel\Excel::CSV);
+        dd($import);
+        $import->toCollection($file);
+    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        $failures = $e->failures();
+        
+        foreach ($failures as $failure) {
+            echo $failure->row(); // row that went wrong
+            echo $failure->attribute(); // either heading key (if using heading row concern) or column index
+            echo $failure->errors(); // Actual error messages from Laravel validator
+            echo $failure->values(); // The values of the row that has failed.
+        }
+    }
+    dump($import);
 }
-
-
-dd(config('DB_PORT'),
-    config('DB_HOST'),
-    config('DB_USERNAME'),
-    config('DB_PASSWORD'),
-$users->first()->slice(1)
-);
 
 
 /*
