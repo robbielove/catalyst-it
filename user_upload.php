@@ -6,6 +6,7 @@
  */
 
 use App\Imports\UsersImport;
+use App\User;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
 use Maatwebsite\Excel\Facades\Excel;
@@ -59,7 +60,10 @@ $port = $args->getOpt('port', env('DB_PORT', '3306'));
 $user = $args->getOpt('user', env('DB_USERNAME', 'root'));
 $host = $args->getOpt('host', env('DB_HOST', 'localhost'));
 $password = $args->getOpt('password', env('DB_PASSWORD', '123'));
-
+config(['database.connections.mysql.port' => $port]);
+config(['database.connections.mysql.username' => $user]);
+config(['database.connections.mysql.host' => $host]);
+config(['database.connections.mysql.password' => $password]);
 //Check if the file exists
 if (!file_exists($file)) {
     die($log->error('Unable to process - The file ' . $file . ' doesn\'t exist'));
@@ -68,14 +72,13 @@ if (!file_exists($file)) {
 }
 
 $users = Excel::toCollection(new UsersImport(), $file);
-$users = $users->first()->slice(1);
-$request = request()->merge($users->first()->slice(1)->all());
-dd($users->first()->slice(1)->all(), $request->all());
-
-config(['database.connections.mysql.port' => $port]);
-config(['database.connections.mysql.username' => $user]);
-config(['database.connections.mysql.host' => $host]);
-config(['database.connections.mysql.password' => $password]);
+//dd($users->first()->all());
+$request = request();
+foreach ($users as $user) {
+    $request->merge($user->all());
+}
+//$request->attributes = request()->merge($users->first()->all());
+dd($request->all());
 
 //Force db refresh
 `php artisan migrate:refresh --force`;
@@ -106,7 +109,7 @@ if ($dry_run) {
     ];
     foreach ($import as $user) {
         dump($user);
-        $request = new \Illuminate\Http\Request([], $user->all(), $user->all());
+//        $request = new \Illuminate\Http\Request([], $user->all(), $user->all());
         $validUser = $request->validate($rules);
         try {
             \Illuminate\Support\Facades\Validator::make($request->all(), $rules)->validateWithBag('e');
@@ -116,7 +119,7 @@ if ($dry_run) {
         }
         if ($validUser->passes()) {
             $created = User::Create();
-            dd($created);
+
             $created->fill([
                 'name' => $user['name'],
                 'surname' => $user['surname'],
@@ -124,7 +127,6 @@ if ($dry_run) {
             ]);
             $created->Save();
         }
-        dump($validUser->getMessageBag());
     }
 }
 

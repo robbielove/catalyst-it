@@ -2,22 +2,24 @@
 
 namespace App\Imports;
 
-use Illuminate\Support\Facades\Validator;
+use App\User;
 use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\OnEachRow;
-use Maatwebsite\Excel\Row;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class UsersImport implements OnEachRow
+class UsersImport implements ToModel, WithHeadingRow
 {
     use Importable;
 
-    public function onRow(Row $row)
+    public function model(array $row)
     {
-        $rowIndex = $row->getIndex();
-        $row = $row->toArray();
-
-        return $row;
+        return new User([
+            'name' => $row['name'],
+            'surname' => $row['surname'],
+            'email' => $row['email'],
+        ]);
     }
+
 
     public function rules(): array
     {
