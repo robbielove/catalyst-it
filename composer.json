@@ -15,6 +15,7 @@
         "laravel/framework": "^7.29",
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
+        "sukohi/csv-validator": "^3.0",
         "vanilla/garden-cli": "~2.0"
     },
     "require-dev": {

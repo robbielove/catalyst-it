@@ -16,19 +16,7 @@ class UsersImport implements OnEachRow
         $rowIndex = $row->getIndex();
         $row = $row->toArray();
 
-//        dd($row);
-        Validator::make($row->toArray(), $this->rules())->validate();
-        $group = Group::firstOrCreate([
-            'name' => $row['name'],
-            'surname' => $row['surname'],
-            'email' => $row['email'],
-        ]);
-
-        $group->users()->create([
-            'name' => $row['name'],
-            'surname' => $row['surname'],
-            'email' => $row['email'],
-        ]);
+        return $row;
     }
 
     public function rules(): array
@@ -39,6 +27,5 @@ class UsersImport implements OnEachRow
             'email' => 'required|unique:users|max:255',
         ];
     }
-
 
 }

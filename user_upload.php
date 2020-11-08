@@ -70,7 +70,7 @@ if (!file_exists($file)) {
 $users = Excel::toCollection(new UsersImport(), $file);
 $users = $users->first()->slice(1);
 $request = request()->merge($users->first()->slice(1)->all());
-//dd($users->first()->slice(1)->all(), $request->all());
+dd($users->first()->slice(1)->all(), $request->all());
 
 config(['database.connections.mysql.port' => $port]);
 config(['database.connections.mysql.username' => $user]);
@@ -93,27 +93,39 @@ if ($dry_run) {
 } else {
     $log->info('Production Run! - ' . $users->count() . ' users found.');
 
-//    dd($import);
-    try {
-        if (File::exists($file)) {
-            $sheets = collect();
-            $import = (new UsersImport())->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
-            $import = $sheets->merge($import[0])->slice(1);
-        }
-//        $import = (new UsersImport())->toCollection('database/seeds/csv/app-features.csv', NULL, \Maatwebsite\Excel\Excel::CSV);
-        dd($import);
-        $import->toCollection($file);
-    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-        $failures = $e->failures();
-        
-        foreach ($failures as $failure) {
-            echo $failure->row(); // row that went wrong
-            echo $failure->attribute(); // either heading key (if using heading row concern) or column index
-            echo $failure->errors(); // Actual error messages from Laravel validator
-            echo $failure->values(); // The values of the row that has failed.
-        }
+    if (File::exists($file)) {
+        $sheets = collect();
+        $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
+        $import = $sheets->merge($import[0])->slice(1);
     }
-    dump($import);
+
+    $rules = [
+        'name' => 'required|max:255',
+        'surname' => 'required|max:255',
+        'email' => 'required|unique:users|max:255',
+    ];
+    foreach ($import as $user) {
+        dump($user);
+        $request = new \Illuminate\Http\Request([], $user->all(), $user->all());
+        $validUser = $request->validate($rules);
+        try {
+            \Illuminate\Support\Facades\Validator::make($request->all(), $rules)->validateWithBag('e');
+        } catch (Throwable $e) {
+            die($request->validate($rules));
+            return FALSE;
+        }
+        if ($validUser->passes()) {
+            $created = User::Create();
+            dd($created);
+            $created->fill([
+                'name' => $user['name'],
+                'surname' => $user['surname'],
+                'email' => $user['email'],
+            ]);
+            $created->Save();
+        }
+        dump($validUser->getMessageBag());
+    }
 }
 
 

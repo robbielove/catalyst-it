@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad1788d7f185b58829fc66f7a7c4579a",
+    "content-hash": "6fe91e8322fd6f6bf5188ca69387bb0e",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2802,6 +2802,97 @@
                 }
             ],
             "time": "2020-08-18T17:17:46+00:00"
+        },
+        {
+            "name": "sukohi/csv-validator",
+            "version": "3.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SUKOHI/CsvValidator.git",
+                "reference": "72b020b474ddf989ead707a5fd34db2b6e576d04"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SUKOHI/CsvValidator/zipball/72b020b474ddf989ead707a5fd34db2b6e576d04",
+                "reference": "72b020b474ddf989ead707a5fd34db2b6e576d04",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.7|^6.0|^7.0|^8.0",
+                "sukohi/fluent-csv": "^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sukohi\\CsvValidator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sukohi",
+                    "email": "capilano.sukohi@gmail.com"
+                }
+            ],
+            "description": "A Laravel package that allows you to validate csv data.",
+            "support": {
+                "issues": "https://github.com/SUKOHI/CsvValidator/issues",
+                "source": "https://github.com/SUKOHI/CsvValidator/tree/3.0.4"
+            },
+            "time": "2020-10-02T00:32:14+00:00"
+        },
+        {
+            "name": "sukohi/fluent-csv",
+            "version": "3.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SUKOHI/FluentCsv.git",
+                "reference": "4cacfacf06dcf7685960dd46a39d00bb238d8bec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SUKOHI/FluentCsv/zipball/4cacfacf06dcf7685960dd46a39d00bb238d8bec",
+                "reference": "4cacfacf06dcf7685960dd46a39d00bb238d8bec",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.7|^6.0|^7.0|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Sukohi\\FluentCsv\\FluentCsvServiceProvider"
+                    ],
+                    "aliases": {
+                        "FluentCsv": "Sukohi\\FluentCsv\\Facades\\FluentCsv"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Sukohi\\FluentCsv\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sukohi",
+                    "email": "capilano.sukohi@gmail.com"
+                }
+            ],
+            "description": "A Laravel package to generate or save csv file with encoding like SJIS-win.",
+            "support": {
+                "issues": "https://github.com/SUKOHI/FluentCsv/issues",
+                "source": "https://github.com/SUKOHI/FluentCsv/tree/3.0.5"
+            },
+            "time": "2020-09-25T21:17:40+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
