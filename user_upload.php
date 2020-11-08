@@ -71,8 +71,17 @@ if (!file_exists($file)) {
     $log->info($file . ' found');
 }
 
-$users = Excel::toCollection(new UsersImport(), $file);
-//dd($users->first()->all());
+$import = new UsersImport();
+$import->import($file);
+
+foreach ($import->failures() as $failure) {
+    $failure->row(); // row that went wrong
+    $failure->attribute(); // either heading key (if using heading row concern) or column index
+    $failure->errors(); // Actual error messages from Laravel validator
+    $failure->values(); // The values of the row that has failed.
+    dump($failure);
+}
+
 $request = request();
 foreach ($users as $user) {
     $request->merge($user->all());
@@ -111,12 +120,7 @@ if ($dry_run) {
         dump($user);
 //        $request = new \Illuminate\Http\Request([], $user->all(), $user->all());
         $validUser = $request->validate($rules);
-        try {
-            \Illuminate\Support\Facades\Validator::make($request->all(), $rules)->validateWithBag('e');
-        } catch (Throwable $e) {
-            die($request->validate($rules));
-            return FALSE;
-        }
+
         if ($validUser->passes()) {
             $created = User::Create();
 
