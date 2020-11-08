@@ -9,6 +9,7 @@ use App\Imports\UsersImport;
 use App\User;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
+use Illuminate\Support\Str;
 
 //ensure we are installed
 //`composer install`;
@@ -84,13 +85,20 @@ if ($create_table) {
 $import = new UsersImport();
 $users = User::all();
 //try to make it a dry run if specified
+$count = $import->toCollection($file)->first()->count();
 if ($dry_run) {
     $log->info('Dry Run!');
-    $log->info($import->toCollection($file)->first()->count() . ' rows found in CSV');
+
+    if (File::exists($file)) {
+        $log->info($file . ' exists');
+        $log->info($count . ' rows found in CSV');
+    }
 } else {
     $log->info('Production Run!');
 
     if (File::exists($file)) {
+        $log->info($file . ' exists');
+        $log->info($count . ' rows found in CSV');
         $sheets = collect();
         $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
         $import = $sheets->merge($import[0])->slice(1);
@@ -101,16 +109,19 @@ if ($dry_run) {
         'surname' => 'required|max:255',
         'email' => 'required|unique:users|max:255',
     ];
-    foreach ($import as $user) {
-//        dump($user);
-            $created = User::Create();
 
-            $created->fill([
-                'name' => $user['name'],
-                'surname' => $user['surname'],
-                'email' => $user['email'],
-            ]);
-            $created->Save();
+    foreach ($import as $user) {
+        $log->info($user . ' found');
+        $created = new User();
+
+        $created->fill([
+            'name' => Str::ucfirst($user['name']),
+            'surname' => Str::ucfirst($user['surname']),
+            'email' => Str::lower($user['email']),
+        ]);
+
+        $created->Save();
+        $log->info($created->name . ' ' . $created->surname . ' saved');
     }
 }
 
@@ -119,7 +130,7 @@ foreach ($import->failures() as $failure) {
     $failure->attribute(); // either heading key (if using heading row concern) or column index
     $failure->errors(); // Actual error messages from Laravel validator
     $failure->values(); // The values of the row that has failed.
-dump($failure);
+    dump($failure);
     $log->error('Error on row ' . $failure->row());
 }
 
