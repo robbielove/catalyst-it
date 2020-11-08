@@ -70,23 +70,6 @@ if (!file_exists($file)) {
     $log->info($file . ' found');
 }
 
-$import = new UsersImport();
-$import->import($file);
-
-foreach ($import->failures() as $failure) {
-    $failure->row(); // row that went wrong
-    $failure->attribute(); // either heading key (if using heading row concern) or column index
-    $failure->errors(); // Actual error messages from Laravel validator
-    $failure->values(); // The values of the row that has failed.
-    dump($failure);
-}
-
-$request = request();
-foreach ($import as $user) {
-    $request->merge($user->all());
-}
-//$request->attributes = request()->merge($users->first()->all());
-dd($request->all());
 
 //Force db refresh
 `php artisan migrate:refresh --force`;
@@ -98,12 +81,14 @@ if ($create_table) {
     $log->info('MYSQL users table created');
 }
 
+$import = new UsersImport();
 $users = User::all();
 //try to make it a dry run if specified
 if ($dry_run) {
-    $log->info('Dry Run! - ' . $users->count() . ' users found.');
+    $log->info('Dry Run!');
+    $log->info($import->toCollection($file)->first()->count() . ' rows found in CSV');
 } else {
-    $log->info('Production Run! - ' . $users->count() . ' users found.');
+    $log->info('Production Run!');
 
     if (File::exists($file)) {
         $sheets = collect();
@@ -117,11 +102,7 @@ if ($dry_run) {
         'email' => 'required|unique:users|max:255',
     ];
     foreach ($import as $user) {
-        dump($user);
-//        $request = new \Illuminate\Http\Request([], $user->all(), $user->all());
-        $validUser = $request->validate($rules);
-
-        if ($validUser->passes()) {
+//        dump($user);
             $created = User::Create();
 
             $created->fill([
@@ -130,8 +111,16 @@ if ($dry_run) {
                 'email' => $user['email'],
             ]);
             $created->Save();
-        }
     }
+}
+
+foreach ($import->failures() as $failure) {
+    $failure->row(); // row that went wrong
+    $failure->attribute(); // either heading key (if using heading row concern) or column index
+    $failure->errors(); // Actual error messages from Laravel validator
+    $failure->values(); // The values of the row that has failed.
+dump($failure);
+    $log->error('Error on row ' . $failure->row());
 }
 
 

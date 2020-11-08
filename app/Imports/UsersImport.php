@@ -3,24 +3,28 @@
 namespace App\Imports;
 
 use App\User;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
+class UsersImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure
 {
     use Importable, SkipsFailures;
 
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        return new User([
-            'name' => $row['name'],
-            'surname' => $row['surname'],
-            'email' => $row['email'],
-        ]);
+        foreach ($rows as $row)
+        {
+            return collect([
+                'name' => $row['name'],
+                'surname' => $row['surname'],
+                'email' => $row['email'],
+            ]);
+        }
     }
 
 
