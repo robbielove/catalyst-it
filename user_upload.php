@@ -9,7 +9,6 @@ use App\Imports\UsersImport;
 use App\User;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
-use Maatwebsite\Excel\Facades\Excel;
 
 //ensure we are installed
 //`composer install`;
@@ -83,7 +82,7 @@ foreach ($import->failures() as $failure) {
 }
 
 $request = request();
-foreach ($users as $user) {
+foreach ($import as $user) {
     $request->merge($user->all());
 }
 //$request->attributes = request()->merge($users->first()->all());
@@ -99,6 +98,7 @@ if ($create_table) {
     $log->info('MYSQL users table created');
 }
 
+$users = User::all();
 //try to make it a dry run if specified
 if ($dry_run) {
     $log->info('Dry Run! - ' . $users->count() . ' users found.');
