@@ -33,7 +33,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
         return [
             'name' => 'required|max:255',
             'surname' => 'required|max:255',
-            'email' => 'required|unique:users|max:255|email',
+            'email' => 'required|unique:users,email|max:255|email',
         ];
     }
 
