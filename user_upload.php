@@ -81,8 +81,7 @@ if ($dry_run) {
     $log->info('Dry Run!');
 
     if (File::exists($file)) {
-        $log->info($file . ' exists');
-        $log->info($count . ' rows found in CSV');
+        $log->info($count . ' rows found in ' . $file);
     }
 } else {
     $log->info('Production Run!');
@@ -104,15 +103,15 @@ if ($dry_run) {
     ];
 
     if (File::exists($file)) {
-        $log->info($file . ' exists');
-        $log->info($count . ' rows found in CSV');
         $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
 
         try {
+            $log->info('Trying to import ' . $file);
             Excel::import(new UsersImport, $file);
         }
         catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
+            $log->error('There was an issue trying to import ' . $file);
 //            dump($e->failures());
         }
     }
@@ -139,9 +138,9 @@ if ($dry_run) {
 //        dd($userRequest->all());
 
 //        $userRequest->validate($rules);
-//        $created->Save();
+        $created->Save();
 
-        $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
+//        $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
     }
 
 //    foreach ($import->failures() as $failure) {

@@ -3,17 +3,20 @@
 namespace App\Imports;
 
 use App\User;
+use Garden\Cli\TaskLogger;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
 
-class UsersImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnError
+class UsersImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
 {
     use Importable, SkipsErrors;
 
@@ -36,8 +39,19 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
         return [
             'name' => 'required|max:255',
             'surname' => 'required|max:255',
-            'email' => 'required|unique:users,email|max:255|email',
+            'email' => 'required|unique:users|max:255|email',
         ];
+    }
+    /**
+     * @param Failure[] $failures
+     */
+    public function onFailure(Failure ...$failures)
+    {
+        foreach ($failures as $failure) {
+            $log = New TaskLogger();
+            $log->error('There was an issue importing');
+            dump($failure);
+        }
     }
 
 }
