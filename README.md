@@ -26,23 +26,24 @@ Run `php user_upload.php --help`
 
  ```
 usage: user_upload.php [<options>]
- 
- Accepts a CSV file as input (see command line directives below) and processes
- the CSV file. The parsed file data is to be inserted into a MySQL database.
- 
- OPTIONS
-   --create_table, -c   This will cause the MySQL users table to be built (and no
-                        further action will be taken)
-   --dry_run, -d        This will be used with the --file directive in case we
-                        want to run the script but not insert into the DB. All
-                        other functions will be executed, but the database will
-                        not be altered
-   --file, -f           This is the name of the CSV to be parsed.
-   --help, -?           Display this help.
-   --host, -h           Connect to host.
-   --password, -p       Password to use when connecting to server.
-   --port, -P           Port number to use.
-   --user, -u           User for login if not current user.
+
+Accepts a CSV file as input (see command line directives below) and processes
+the CSV file. The parsed file data is to be inserted into a MySQL database.
+
+OPTIONS
+  --create_table, -c   This will cause the MySQL users table to be built (and no
+                       further action will be taken)
+  --dry_run, -d        This will be used with the --file directive in case we
+                       want to run the script but not insert into the DB. All
+                       other functions will be executed, but the database will
+                       not be altered
+  --file, -f           This is the name of the CSV to be parsed.
+  --foobar, -z         Run foobar.php and exit
+  --help, -?           Display this help.
+  --host, -h           Connect to host.
+  --password, -p       Password to use when connecting to server.
+  --port, -P           Port number to use.
+  --user, -u           User for login if not current user.
 ```
 
 ### Composer namespace conflict
@@ -60,4 +61,17 @@ php user_upload.php --file=users.csv --host=localhost --user=root
 [2020-11-09 02:11:24] users.csv found
 [2020-11-09 02:11:24] MYSQL users table created
 ...                                    
+```
+
+## Foobar
+
+If you use the `--foobar` or `-z` CLI arguments, you will receive foobar.php results that look like this:
+
+```
+[2020-11-09 07:07:26] Running foobar.php
+
+1, 2, foo, 4, bar, foo, 7, 8, foo, bar, 11, foo, 13, 14, foobar, 16,  ...
+
+[2020-11-09 07:07:26] Finished running foobar.php
+
 ```
