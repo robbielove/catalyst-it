@@ -8,11 +8,13 @@ An error message will be output to explain the issue and the command can be run 
 
 ## Install
 
-The script requires dependencies to work, you can either run `php composer install` or uncomment this line in the script (L15)
+The script requires dependencies to work. You can either run `php composer install` or uncomment this line in the script (L15) before running the script.
 
 ## Database destruction
 
 Due to the nature of this script and the requirements - the database will always be cleared first and then the tables re-created.
+
+THIS MEANS ALL YOUR PREVIOUS DATA WILL BE DELETED!
 
 ## CLI help
 
