@@ -12,7 +12,7 @@ The script requires dependencies to work. You can either run `php composer insta
 
 ## Database destruction
 
-Due to the nature of this script and the requirements - the database will always be cleared first and then the tables re-created.
+Due to the nature of this script and the requirements - the database will always be cleared first (except for dry runs) and then the tables re-created.
 
 THIS MEANS ALL YOUR PREVIOUS DATA WILL BE DELETED!
 

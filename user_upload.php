@@ -72,16 +72,6 @@ if (!file_exists($file)) {
 }
 
 
-//Force db refresh
-`php artisan migrate:refresh --force`;
-
-//Abort if we are just here to make the DB - it was 'made' before...
-if ($create_table !== NULL) {
-    die($log->info('MYSQL users table created (no further action taken)'));
-} else {
-    $log->info('MYSQL users table created');
-}
-
 $import = new UsersImport();
 $users = User::all();
 //try to make it a dry run if specified
@@ -95,6 +85,16 @@ if ($dry_run) {
     }
 } else {
     $log->info('Production Run!');
+
+    //Force db refresh
+    `php artisan migrate:refresh --force`;
+
+    //Abort if we are just here to make the DB - it was 'made' before...
+    if ($create_table !== NULL) {
+        die($log->info('MYSQL users table created (no further action taken)'));
+    } else {
+        $log->info('MYSQL users table created');
+    }
 
     if (File::exists($file)) {
         $log->info($file . ' exists');
@@ -120,7 +120,7 @@ if ($dry_run) {
             $log->error('Error on row ' . $failure->row());
         }
 
-        $log->info('User '. $user['name'] . ' ' . $user['surname'] . ' found');
+        $log->info('User ' . $user['name'] . ' ' . $user['surname'] . ' found');
         $created = new User();
 
         $created->fill([
@@ -136,7 +136,7 @@ if ($dry_run) {
         $userRequest->validate($rules);
         $created->Save();
 
-        $log->info('User '. $created->name . ' ' . $created->surname . ' saved');
+        $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
     }
 }
 
