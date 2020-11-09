@@ -81,7 +81,7 @@ if (!File::exists($file)) {
 }
 
 $import = new UsersImport();
-$log->info('Trying to process ' . $file);
+$log->info('Importing ' . $file);
 $count = $import->toCollection($file)->first()->count();
 
 //try to make it a dry run if specified

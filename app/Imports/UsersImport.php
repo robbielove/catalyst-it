@@ -32,7 +32,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
 
     public function model(array $row)
     {
-            $this->log->info($row['email']);
+            $this->log->info($row['name'] . ' '. $row['surname'] . ' - <' . $row['email'] . '> imported');
             return User::create([
                 'name' => Str::ucfirst($row['name']),
                 'surname' => Str::ucfirst($row['surname']),
@@ -56,12 +56,11 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {
-            $this->log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row() . ':');
+            $this->log->error('There was an issue importing the attribute "' . $failure->attribute() . '" on row ' . $failure->row() . ':');
             foreach ($failure->errors() as $error) {
-                $this->log->error($failure->values()[$failure->attribute()]);
-                $this->log->error($error);
+                $this->log->error($failure->values()[$failure->attribute()] . ' - ' . $error);
             }
-            $this->log->error('There was an issue importing the row.');
+            $this->log->error('The row was not imported.');
         }
     }
 
