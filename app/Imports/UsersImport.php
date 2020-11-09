@@ -21,10 +21,15 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
 {
     use Importable, SkipsFailures, SkipsErrors;
 
+    protected $log;
+
+    public function __construct()
+    {
+        $this->log = New TaskLogger();
+    }
+
     public function collection(Collection $rows)
     {
-        Validator::make($rows->toArray(), $this->rules())->validate();
-
         foreach ($rows as $row) {
             return User::create([
                 'name' => Str::ucfirst($row['name']),
@@ -50,10 +55,9 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {
-            $log = New TaskLogger();
-            $log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row());
+            $this->log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row());
             foreach ($failure->errors() as $error) {
-                $log->error($error);
+                $this->log->error($error);
             }
         }
     }
@@ -63,7 +67,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
      */
     public function onError(\Throwable $e)
     {
-        return $e;
+//        return $e;
     }
 
 }

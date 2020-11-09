@@ -101,7 +101,7 @@ if ($dry_run) {
     `php artisan migrate:refresh --force`;
 
     $import = $import->import($file);
-    $import = $import->first();
+//    $import = $import->first();
 
 //        try {
 //Excel::import(new UsersImport, $file);
@@ -126,26 +126,26 @@ if ($dry_run) {
     ];
 
 
-    foreach ($import as $user) {
+//    foreach ($import as $user) {
+//
+//        $log->info('User ' . $user['name'] . ' ' . $user['surname'] . ' found');
+//        $created = new User();
+//
+//        $created->fill([
+//            'name' => Str::ucfirst($user['name']),
+//            'surname' => Str::ucfirst($user['surname']),
+//            'email' => Str::lower($user['email']),
+//        ]);
 
-        $log->info('User ' . $user['name'] . ' ' . $user['surname'] . ' found');
-        $created = new User();
-
-        $created->fill([
-            'name' => Str::ucfirst($user['name']),
-            'surname' => Str::ucfirst($user['surname']),
-            'email' => Str::lower($user['email']),
-        ]);
-
-        $userRequest = request();
-        $userRequest = $userRequest->merge($created->attributesToArray());
+//        $userRequest = request();
+//        $userRequest = $userRequest->merge($created->attributesToArray());
 //        dd($userRequest->all());
 
 //        $userRequest->validate($rules);
-        $created->Save();
+//        $created->Save();
 
 //        $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
-    }
+//    }
 
 //    foreach ($import->failures() as $failure) {
 //        $failure->row(); // row that went wrong
