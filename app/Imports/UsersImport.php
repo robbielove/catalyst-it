@@ -55,10 +55,12 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {
-            $this->log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row());
+            $this->log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row() . ':');
             foreach ($failure->errors() as $error) {
+                $this->log->error($failure->values()[$failure->attribute()]);
                 $this->log->error($error);
             }
+            $this->log->error('There was an issue importing the row.');
         }
     }
 
