@@ -2,7 +2,6 @@
 
 namespace App\Imports;
 
-use App\User;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
@@ -17,8 +16,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row)
-        {
+        foreach ($rows as $row) {
             return collect([
                 'name' => $row['name'],
                 'surname' => $row['surname'],

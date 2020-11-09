@@ -99,9 +99,8 @@ if ($dry_run) {
     if (File::exists($file)) {
         $log->info($file . ' exists');
         $log->info($count . ' rows found in CSV');
-        $sheets = collect();
         $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
-        $import = $sheets->merge($import[0])->slice(1);
+        $import = $import->first();
     }
 
     $rules = [
@@ -111,6 +110,16 @@ if ($dry_run) {
     ];
 
     foreach ($import as $user) {
+
+        foreach ($import->failures() as $failure) {
+            $failure->row(); // row that went wrong
+            $failure->attribute(); // either heading key (if using heading row concern) or column index
+            $failure->errors(); // Actual error messages from Laravel validator
+            $failure->values(); // The values of the row that has failed.
+            dump($failure);
+            $log->error('Error on row ' . $failure->row());
+        }
+
         $log->info('User '. $user['name'] . ' ' . $user['surname'] . ' found');
         $created = new User();
 
@@ -123,32 +132,12 @@ if ($dry_run) {
         $userRequest = request();
         $userRequest = $userRequest->merge($created->attributesToArray());
 //        dd($userRequest->all());
-        try {
-            $userRequest->validate($rules);
-            $created->Save();
-//            $import->import('import-users.xlsx');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $failures = $e->failures();
 
-            foreach ($failures as $failure) {
-                $failure->row(); // row that went wrong
-                $failure->attribute(); // either heading key (if using heading row concern) or column index
-                $failure->errors(); // Actual error messages from Laravel validator
-                $failure->values(); // The values of the row that has failed.
-            }
-        }
+        $userRequest->validate($rules);
+        $created->Save();
 
         $log->info('User '. $created->name . ' ' . $created->surname . ' saved');
     }
-}
-
-foreach ($import->failures() as $failure) {
-    $failure->row(); // row that went wrong
-    $failure->attribute(); // either heading key (if using heading row concern) or column index
-    $failure->errors(); // Actual error messages from Laravel validator
-    $failure->values(); // The values of the row that has failed.
-    dump($failure);
-    $log->error('Error on row ' . $failure->row());
 }
 
 
