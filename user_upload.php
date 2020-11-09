@@ -10,6 +10,7 @@ use App\User;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 //ensure we are installed
 //`composer install`;
@@ -96,29 +97,33 @@ if ($dry_run) {
         $log->info('MYSQL users table created');
     }
 
-    if (File::exists($file)) {
-        $log->info($file . ' exists');
-        $log->info($count . ' rows found in CSV');
-        $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
-        $import = $import->first();
-    }
-
     $rules = [
         'name' => 'required|max:255',
         'surname' => 'required|max:255',
         'email' => 'required|unique:users|max:255|email',
     ];
 
-    foreach ($import as $user) {
+    if (File::exists($file)) {
+        $log->info($file . ' exists');
+        $log->info($count . ' rows found in CSV');
+        $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
 
-        foreach ($import->failures() as $failure) {
-            $failure->row(); // row that went wrong
-            $failure->attribute(); // either heading key (if using heading row concern) or column index
-            $failure->errors(); // Actual error messages from Laravel validator
-            $failure->values(); // The values of the row that has failed.
-            dump($failure);
-            $log->error('Error on row ' . $failure->row());
+        try {
+            Excel::import(new UsersImport, $file);
         }
+        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+//            dump($e->failures());
+        }
+    }
+
+    foreach ($failures as $failure) {
+        dump($failure);
+    }
+
+    $import = $import->first();
+
+    foreach ($import as $user) {
 
         $log->info('User ' . $user['name'] . ' ' . $user['surname'] . ' found');
         $created = new User();
@@ -133,11 +138,20 @@ if ($dry_run) {
         $userRequest = $userRequest->merge($created->attributesToArray());
 //        dd($userRequest->all());
 
-        $userRequest->validate($rules);
-        $created->Save();
+//        $userRequest->validate($rules);
+//        $created->Save();
 
         $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
     }
+
+//    foreach ($import->failures() as $failure) {
+//        $failure->row(); // row that went wrong
+//        $failure->attribute(); // either heading key (if using heading row concern) or column index
+//        $failure->errors(); // Actual error messages from Laravel validator
+//        $failure->values(); // The values of the row that has failed.
+//        dump($failure);
+//        $log->error('Error on row ' . $failure->row());
+//    }
 }
 
 
