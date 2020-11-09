@@ -49,8 +49,10 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     {
         foreach ($failures as $failure) {
             $log = New TaskLogger();
-            $log->error('There was an issue importing');
-            dump($failure);
+            $log->error('There was an issue importing the attribute ' . $failure->attribute() . ' on row ' . $failure->row());
+            foreach ($failure->errors() as $error) {
+                $log->error($error);
+            }
         }
     }
 
