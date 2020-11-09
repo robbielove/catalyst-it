@@ -13,11 +13,13 @@ use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Validators\Failure;
 
-class UsersImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
+class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
 {
     use Importable, SkipsFailures, SkipsErrors;
 
@@ -28,15 +30,14 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
         $this->log = New TaskLogger();
     }
 
-    public function collection(Collection $rows)
+    public function model(array $row)
     {
-        foreach ($rows as $row) {
+            $this->log->info($row['email']);
             return User::create([
                 'name' => Str::ucfirst($row['name']),
                 'surname' => Str::ucfirst($row['surname']),
                 'email' => Str::lower($row['email']),
             ]);
-        }
     }
 
 
@@ -45,7 +46,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
         return [
             '*.name' => 'required|max:255',
             '*.surname' => 'required|max:255',
-            '*.email' => 'required|unique:users|max:255|email',
+            '*.email' => 'required|unique:users,email|max:255|email',
         ];
     }
 
@@ -69,7 +70,7 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
      */
     public function onError(\Throwable $e)
     {
-//        return $e;
+        $this->log->error($e);
     }
 
 }

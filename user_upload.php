@@ -105,7 +105,6 @@ if ($dry_run) {
     }
 
     $import = $import->import($file);
-//    $import = $import->first();
 
 }
 
