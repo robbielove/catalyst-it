@@ -76,7 +76,7 @@ if (!file_exists($file)) {
 `php artisan migrate:refresh --force`;
 
 //Abort if we are just here to make the DB - it was 'made' before...
-if ($create_table) {
+if ($create_table !== NULL) {
     die($log->info('MYSQL users table created (no further action taken)'));
 } else {
     $log->info('MYSQL users table created');
