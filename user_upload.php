@@ -107,11 +107,11 @@ if ($dry_run) {
     $rules = [
         'name' => 'required|max:255',
         'surname' => 'required|max:255',
-        'email' => 'required|unique:users|max:255',
+        'email' => 'required|unique:users|max:255|email',
     ];
 
     foreach ($import as $user) {
-        $log->info($user . ' found');
+        $log->info('User '. $user['name'] . ' ' . $user['surname'] . ' found');
         $created = new User();
 
         $created->fill([
@@ -120,6 +120,10 @@ if ($dry_run) {
             'email' => Str::lower($user['email']),
         ]);
 
+        $userRequest = request();
+        $userRequest->merge($created->attributesToArray());
+        $userRequest->validate();
+        dd($userRequest);
         $created->Save();
         $log->info($created->name . ' ' . $created->surname . ' saved');
     }
