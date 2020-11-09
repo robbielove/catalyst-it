@@ -6,11 +6,8 @@
  */
 
 use App\Imports\UsersImport;
-use App\User;
 use Garden\Cli\Cli;
 use Garden\Cli\TaskLogger;
-use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 
 //ensure we are installed
 //`composer install`;
@@ -100,18 +97,6 @@ if ($dry_run) {
     //Force db refresh
     `php artisan migrate:refresh --force`;
 
-    $import = $import->import($file);
-//    $import = $import->first();
-
-//        try {
-//Excel::import(new UsersImport, $file);
-//        }
-//        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-//            $failures = $e->failures();
-//            $log->error('There was an issue trying to import ' . $file);
-////            dump($e->failures());
-//        }
-
     //Abort if we are just here to make the DB - it was 'made' before...
     if ($create_table !== NULL) {
         die($log->info('MYSQL users table created (no further action taken)'));
@@ -119,42 +104,9 @@ if ($dry_run) {
         $log->info('MYSQL users table created');
     }
 
-    $rules = [
-        'name' => 'required|max:255',
-        'surname' => 'required|max:255',
-        'email' => 'required|unique:users|max:255|email',
-    ];
+    $import = $import->import($file);
+//    $import = $import->first();
 
-
-//    foreach ($import as $user) {
-//
-//        $log->info('User ' . $user['name'] . ' ' . $user['surname'] . ' found');
-//        $created = new User();
-//
-//        $created->fill([
-//            'name' => Str::ucfirst($user['name']),
-//            'surname' => Str::ucfirst($user['surname']),
-//            'email' => Str::lower($user['email']),
-//        ]);
-
-//        $userRequest = request();
-//        $userRequest = $userRequest->merge($created->attributesToArray());
-//        dd($userRequest->all());
-
-//        $userRequest->validate($rules);
-//        $created->Save();
-
-//        $log->info('User ' . $created->name . ' ' . $created->surname . ' saved');
-//    }
-
-//    foreach ($import->failures() as $failure) {
-//        $failure->row(); // row that went wrong
-//        $failure->attribute(); // either heading key (if using heading row concern) or column index
-//        $failure->errors(); // Actual error messages from Laravel validator
-//        $failure->values(); // The values of the row that has failed.
-//        dump($failure);
-//        $log->error('Error on row ' . $failure->row());
-//    }
 }
 
 
