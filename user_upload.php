@@ -48,7 +48,8 @@ $cli->description('Accepts a CSV file as input (see command line directives belo
     ->opt('port:P', 'Port number to use.', FALSE, 'integer')
     ->opt('user:u', 'User for login if not current user.', TRUE)
     ->opt('host:h', 'Connect to host.', TRUE)
-    ->opt('password:p', 'Password to use when connecting to server.');
+    ->opt('password:p', 'Password to use when connecting to server.')
+    ->opt('foobar:z', 'Run foobar.php and exit', FALSE);
 
 $log = new TaskLogger();
 
@@ -61,6 +62,16 @@ $port = $args->getOpt('port', env('DB_PORT', '3306'));
 $user = $args->getOpt('user', env('DB_USERNAME', 'root'));
 $host = $args->getOpt('host', env('DB_HOST', 'localhost'));
 $password = $args->getOpt('password', env('DB_PASSWORD', '123'));
+$foobar = $args->getOpt('foobar');
+//maybe run foobar
+if ($foobar !== NULL) {
+    $log->info('Running foobar.php');
+    echo "\r\n";
+    include('foobar.php');
+    echo "\r\n\r\n";
+    $log->info('Finished running foobar.php');
+    die();
+}
 config(['database.connections.mysql.port' => $port]);
 config(['database.connections.mysql.username' => $user]);
 config(['database.connections.mysql.host' => $host]);
