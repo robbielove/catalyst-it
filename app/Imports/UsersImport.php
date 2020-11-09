@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -18,7 +19,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class UsersImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure
 {
-    use Importable, SkipsErrors;
+    use Importable, SkipsFailures, SkipsErrors;
 
     public function collection(Collection $rows)
     {
@@ -37,11 +38,12 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
-            'surname' => 'required|max:255',
-            'email' => 'required|unique:users|max:255|email',
+            '*.name' => 'required|max:255',
+            '*.surname' => 'required|max:255',
+            '*.email' => 'required|unique:users|max:255|email',
         ];
     }
+
     /**
      * @param Failure[] $failures
      */
@@ -54,6 +56,14 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation, Skips
                 $log->error($error);
             }
         }
+    }
+
+    /**
+     * @param \Throwable $e
+     */
+    public function onError(\Throwable $e)
+    {
+        return $e;
     }
 
 }

@@ -66,17 +66,17 @@ config(['database.connections.mysql.username' => $user]);
 config(['database.connections.mysql.host' => $host]);
 config(['database.connections.mysql.password' => $password]);
 //Check if the file exists
-if (!file_exists($file)) {
+if (!File::exists($file)) {
     die($log->error('Unable to process - The file ' . $file . ' doesn\'t exist'));
 } else {
     $log->info($file . ' found');
 }
 
-
 $import = new UsersImport();
-$users = User::all();
-//try to make it a dry run if specified
+$log->info('Trying to process ' . $file);
 $count = $import->toCollection($file)->first()->count();
+
+//try to make it a dry run if specified
 if ($dry_run) {
     $log->info('Dry Run!');
 
@@ -88,6 +88,18 @@ if ($dry_run) {
 
     //Force db refresh
     `php artisan migrate:refresh --force`;
+
+    $import = $import->import($file);
+    $import = $import->first();
+
+//        try {
+//Excel::import(new UsersImport, $file);
+//        }
+//        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+//            $failures = $e->failures();
+//            $log->error('There was an issue trying to import ' . $file);
+////            dump($e->failures());
+//        }
 
     //Abort if we are just here to make the DB - it was 'made' before...
     if ($create_table !== NULL) {
@@ -102,25 +114,6 @@ if ($dry_run) {
         'email' => 'required|unique:users|max:255|email',
     ];
 
-    if (File::exists($file)) {
-        $import = (new UsersImport)->toCollection($file, NULL, \Maatwebsite\Excel\Excel::CSV);
-
-        try {
-            $log->info('Trying to import ' . $file);
-            Excel::import(new UsersImport, $file);
-        }
-        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            $failures = $e->failures();
-            $log->error('There was an issue trying to import ' . $file);
-//            dump($e->failures());
-        }
-    }
-
-    foreach ($failures as $failure) {
-        dump($failure);
-    }
-
-    $import = $import->first();
 
     foreach ($import as $user) {
 
